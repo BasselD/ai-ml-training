@@ -11,3 +11,8 @@ This repo houses my Jupyter Notebooks and Python scripts for training and educat
   - Feature Engineering and Selection
 - Machine Learning Algorithms
 - Deep Learning
+
+# Other Sources
+📚 Books
+✅ Deep Learning with Python by François Chollet, creator of Keras and one of the top dogs at Google
+✅ The Data Integration Guide by Ahmed Fessi, all the basic things you need and want to know

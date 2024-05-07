@@ -1,0 +1,221 @@
+<title>Scatter Plot</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+    .tooltip {
+        position: absolute;
+        background-color: white;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+    }
+</style>
+</head>
+<body>
+
+<div id="chart"></div>
+
+<script>
+    // Dataset
+    const data = {
+        'ReportName': ['Fin Rep 1', 'Fin Rep 2', 'Fin Rep 3', 'Fin Rep 4', 'Fin Rep 5', 'Fin Rep 6', 'Fin Rep 7', 'Fin Rep 8', 'Fin Rep 9', 'Fin Rep 10', 'Fin Rep 11'],
+        'Importance': [0.4, 0.7, 0.9, 0.9, 0.7, 0.4, 0.6, 0.9, 0.7, 0.3, 0.4],
+        'TimeSaving': [0.6, 0.6, 0.4, 0.6, 0.6, 0.5, 0.8, 0.3, 0.5, 0.8, 0.2],
+        'Simplicity': [0.7, 0.9, 0.4, 0.2, 0.5, 0.8, 0.8, 0.5, 0.6, 0.7, 0.3],
+        'Cohorts': ['Phase 2', 'Phase 1', 'Out-of-Scope', 'Out-of-Scope', 'Phase 2', 'Phase 1', 'Phase 1', 'Out-of-Scope', 'Phase 2', 'Phase 1', 'Out-of-Scope']
+    };
+
+    // Set up dimensions
+    const margin = { top: 20, right: 20, bottom: 50, left: 50 };
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    // Append SVG
+    const svg = d3.select("#chart")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // Scales
+    const xScale = d3.scaleLinear()
+        .domain([0, 1])
+        .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+        .domain([0, 1])
+        .range([height, 0]);
+
+    const sizeScale = d3.scaleLinear()
+        .domain(d3.extent(data['Importance']))
+        .range([3, 10]);
+
+    // Color scale
+    const colorScale = d3.scaleOrdinal()
+        .domain(['Phase 1', 'Phase 2', 'Out-of-Scope'])
+        .range(['#57A773', '#fed766', '#ee6352']);
+
+    // Add circles
+    svg.selectAll("circle")
+        .data(data['ReportName'])
+        .enter().append("circle")
+        .attr("cx", d => xScale(data['TimeSaving'][data['ReportName'].indexOf(d)]))
+        .attr("cy", d => yScale(data['Simplicity'][data['ReportName'].indexOf(d)]))
+        .attr("r", d => sizeScale(data['Importance'][data['ReportName'].indexOf(d)]))
+        .style("fill", d => colorScale(data['Cohorts'][data['ReportName'].indexOf(d)]))
+        .style("opacity", 0.7)
+        .on("mouseover", handleMouseOver)
+        .on("mouseout", handleMouseOut);
+
+    // Add axes
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    svg.append("g")
+        .call(yAxis);
+
+    // Axis titles
+    svg.append("text")
+        .attr("transform", "translate(" + (width / 2) + " ," + (height + margin.top + 20) + ")")
+        .style("text-anchor", "middle")
+        .text("Time Saving");
+
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x", 0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Simplicity");
+
+    // Tooltip
+    const tooltip = d3.select("#chart")
+        .append("div")
+        .attr("class", "tooltip");
+
+    function handleMouseOver(event, d) {
+        const importance = data['Importance'][data['ReportName'].indexOf(d)];
+        const timeSaving = data['TimeSaving'][data['ReportName'].indexOf(d)];
+        const simplicity = data['Simplicity'][data['ReportName'].indexOf(d)];
+        const cohort = data['Cohorts'][data['ReportName'].indexOf(d)];
+
+        tooltip.style("opacity", 1)
+            .html(`<strong>Report Name:</strong> ${d}<br><strong>Importance:</strong> ${importance}<br><strong>Time Saving:</strong> ${timeSaving}<br><strong>Simplicity:</strong> ${simplicity}<br><strong>Cohort:</strong> ${cohort}`)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 20) + "px");
+    }
+
+    function handleMouseOut() {
+        tooltip.style("opacity", 0);
+    }
+</script>
+
+<title>Expanding Rectangles</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .container {
+        text-align: center;
+    }
+
+    .rectangle {
+        width: 600px;
+        height: 50px;
+        margin: 10px;
+        float: left;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .green { background-color: #57a773; }
+    .yellow { background-color: #FED766; }
+    .red { background-color: #EE6352; }
+
+    .rectangle:hover {
+        width: 150px;
+        height: 75px;
+        z-index: 1;
+    }
+
+    .rectangle:not(:hover) {
+        width: 80px;
+        height: 60px;
+    }
+
+    .text {
+        text-align: center;
+        color: white;
+    }
+
+    .text p {
+        display: none;
+        font-size: 14px; /* Default font size */
+
+    }
+
+    .rectangle:hover .text p {
+        display: block;
+        font-size: 10px; /* Smaller font size for expanded text */
+    }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="rectangle green" onmouseover="expand(this)">
+    <div class="text">
+        <h3>Phase 1</h3>
+        <p>High Simplicity, High Time Saving</p>
+    </div>
+</div>
+
+<div class="rectangle yellow" onmouseover="expand(this)">
+    <div class="text">
+        <h3>Phase 2</h3>
+        <p>Additional text here.</p>
+    </div>
+</div>
+
+<div class="rectangle red" onmouseover="expand(this)">
+    <div class="text">
+        <h3>Out-of-Scope</h3>
+        <p>Additional text here.</p>
+    </div>
+</div>
+</div>
+
+<script>
+    function expand(rectangle) {
+        var rectangles = document.querySelectorAll('.rectangle');
+        rectangles.forEach(function(rect) {
+            if (rect !== rectangle) {
+                rect.style.width = "175px";
+                rect.style.height = "37.5px";
+            }
+        });
+        rectangle.style.width = "250px";
+        rectangle.style.height = "75px";
+    }
+
+    document.addEventListener("mouseover", function(event) {
+        var isHovered = false;
+        document.querySelectorAll('.rectangle').forEach(function(rectangle) {
+            if (event.target === rectangle || rectangle.contains(event.target)) {
+                isHovered = true;
+            }
+        });
+        if (!isHovered) {
+            document.querySelectorAll('.rectangle').forEach(function(rectangle) {
+                rectangle.style.width = "200px";
+                rectangle.style.height = "50px";
+            });
+        }
+    });
+</script>

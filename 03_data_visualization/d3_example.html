@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Simple Bar Chart with D3.js</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    .bar {
+      fill: steelblue;
+    }
+  </style>
+</head>
+<body>
+
+  <svg width="400" height="200"></svg>
+
+  <script>
+    // Sample data
+    const data = [12, 7, 2, 18, 9, 15];
+
+    // Set up margins for the chart
+    const margin = { top: 20, right: 20, bottom: 30, left: 40 };
+    const width = 400 - margin.left - margin.right;
+    const height = 200 - margin.top - margin.bottom;
+
+    // Create an SVG element within the 'svg' tag
+    const svg = d3.select("svg")
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Create scales for x and y axes
+    const x = d3.scaleBand()
+      .range([0, width])
+      .domain(data.map((_, i) => i))
+      .padding(0.2);
+
+    const y = d3.scaleLinear()
+      .range([height, 0])
+      .domain([0, d3.max(data)]);
+
+    // Create and append the bars
+    svg.selectAll(".bar")
+      .data(data)
+      .enter()
+      .append("rect")
+      .attr("class", "bar")
+      .attr("x", (d, i) => x(i))
+      .attr("y", d => y(d))
+      .attr("width", x.bandwidth())
+      .attr("height", d => height - y(d));
+
+    // Add x-axis
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x));
+
+    // Add y-axis
+    svg.append("g")
+      .call(d3.axisLeft(y));
+  </script>
+
+</body>
+</html>
